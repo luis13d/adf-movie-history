@@ -1,0 +1,407 @@
+{
+	"name": "pl_ingest_movie_history_data",
+	"properties": {
+		"activities": [
+			{
+				"name": "Get Folder Details",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ds_movie_history_bronze",
+						"type": "DatasetReference",
+						"parameters": {
+							"p_ds_file_date": {
+								"value": "@pipeline().parameters.p_environment",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobFSReadSettings",
+						"recursive": true,
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			},
+			{
+				"name": "If folder exists",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Get Folder Details",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@activity('Get Folder Details').output.exists",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "email_error",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/luisrafaeldiazven@outlook.com/databricks-course/movie-history/utils/02.mail-error"
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_Databricks",
+								"type": "LinkedServiceReference"
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Ingest_Movie_File",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/luisrafaeldiazven@outlook.com/databricks-course/movie-history/ingestion/01.Ingestion_file_movie",
+								"baseParameters": {
+									"p_environment": {
+										"value": "@pipeline().parameters.p_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_Databricks",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest_Language_File_",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/luisrafaeldiazven@outlook.com/databricks-course/movie-history/ingestion/02.Ingestion_file_language",
+								"baseParameters": {
+									"p_environment": {
+										"value": "@pipeline().parameters.p_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_Databricks",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest_Genre_File",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/luisrafaeldiazven@outlook.com/databricks-course/movie-history/ingestion/03.Ingestion_file_genre",
+								"baseParameters": {
+									"p_environment": {
+										"value": "@pipeline().parameters.p_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_Databricks",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest_Country_File",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/luisrafaeldiazven@outlook.com/databricks-course/movie-history/ingestion/04.Ingestion_file_country",
+								"baseParameters": {
+									"p_environment": {
+										"value": "@pipeline().parameters.p_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_Databricks",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest_Movie_Persom_File",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/luisrafaeldiazven@outlook.com/databricks-course/movie-history/ingestion/04.Ingestion_file_country",
+								"baseParameters": {
+									"p_environment": {
+										"value": "@pipeline().parameters.p_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_Databricks",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest_Movie_Genre_File",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/luisrafaeldiazven@outlook.com/databricks-course/movie-history/ingestion/06.Ingestion_file_movie_genre",
+								"baseParameters": {
+									"p_environment": {
+										"value": "@pipeline().parameters.p_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_Databricks",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest_Movie_Cast_File",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/luisrafaeldiazven@outlook.com/databricks-course/movie-history/ingestion/07.Ingestion_file_movie_cast",
+								"baseParameters": {
+									"p_environment": {
+										"value": "@pipeline().parameters.p_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_Databricks",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest_Language_role_File_copy1",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/luisrafaeldiazven@outlook.com/databricks-course/movie-history/ingestion/08.Ingestion_file_language_role",
+								"baseParameters": {
+									"p_environment": {
+										"value": "@pipeline().parameters.p_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_Databricks",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest_Production_Company_folder",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/luisrafaeldiazven@outlook.com/databricks-course/movie-history/ingestion/09.Ingestion_folder_production_company",
+								"baseParameters": {
+									"p_environment": {
+										"value": "@pipeline().parameters.p_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_Databricks",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest_Movie_Language_Folder",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/luisrafaeldiazven@outlook.com/databricks-course/movie-history/ingestion/10.Ingestion_folder_movie_language",
+								"baseParameters": {
+									"p_environment": {
+										"value": "@pipeline().parameters.p_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_Databricks",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest_Movie_company_folder",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/luisrafaeldiazven@outlook.com/databricks-course/movie-history/ingestion/11.Ingestion_folder_movie_company",
+								"baseParameters": {
+									"p_environment": {
+										"value": "@pipeline().parameters.p_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_Databricks",
+								"type": "LinkedServiceReference"
+							}
+						},
+						{
+							"name": "Ingest_Production_Country_folder",
+							"type": "DatabricksNotebook",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"notebookPath": "/Users/luisrafaeldiazven@outlook.com/databricks-course/movie-history/ingestion/12.Ingestion_folder_production_country",
+								"baseParameters": {
+									"p_environment": {
+										"value": "@pipeline().parameters.p_environment",
+										"type": "Expression"
+									}
+								}
+							},
+							"linkedServiceName": {
+								"referenceName": "LS_Databricks",
+								"type": "LinkedServiceReference"
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"p_environment": {
+				"type": "string",
+				"defaultValue": "Production"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2025-06-24T00:13:16Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
